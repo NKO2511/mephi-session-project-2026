@@ -1,0 +1,29 @@
+    1  nmcli -g ipv4.method con show enp0s3
+    2  hostnamectl
+    3  ping -c 4 8.8.8.8 > ~/ping.out
+    4  cat ~/ping.out
+    5  history -a
+    6  exit
+    7  cat ~/ping.out
+    8  history | tail -5
+    9  dnf upgrade -y && dnf install -y nginx libcap-ng-utils dnf-plugins-core policycoreutils-python-utils git && dnf download tcpdump --destdir /tmp && ls -l /tmp/tcpdump-*.rpm && { rpm -ivh /tmp/tcpdump-*.rpm || rpm -Uvh --replacepkgs /tmp/tcpdump-*.rpm; } && rpm -q tcpdump
+   10  rm -f /tmp/tcpdump-*.i686.rpm && ls -l /tmp/tcpdump-*.rpm && rpm -ivh /tmp/tcpdump-*.x86_64.rpm && rpm -q tcpdump
+   11  lsblk && [ "$(lsblk -dno SIZE /dev/sdb)" = "1G" ] && [ -z "$(lsblk -no NAME /dev/sdb | tail -n +2)" ] && parted -s /dev/sdb mklabel gpt mkpart primary ext4 0% 100% && sleep 1 && mkfs.ext4 -L MEPHI_WEB /dev/sdb1 && blkid /dev/sdb1 && mkdir -p /mephi-web && { grep -q '^LABEL=MEPHI_WEB' /etc/fstab || echo 'LABEL=MEPHI_WEB  /mephi-web  ext4  defaults  0 2' >> /etc/fstab; } && systemctl daemon-reload && mount /mephi-web && findmnt /mephi-web && tail -1 /etc/fstab
+   12  parted -s /dev/sdb mklabel gpt mkpart primary ext4 0% 100% && sleep 1 && mkfs.ext4 -L MEPHI_WEB /dev/sdb1 && blkid /dev/sdb1 && mkdir -p /mephi-web && { grep -q '^LABEL=MEPHI_WEB' /etc/fstab || echo 'LABEL=MEPHI_WEB  /mephi-web  ext4  defaults  0 2' >> /etc/fstab; } && systemctl daemon-reload && mount /mephi-web && findmnt /mephi-web && tail -1 /etc/fstab && lsblk /dev/sdb
+   13  systemctl enable --now nginx && systemctl is-enabled nginx && systemctl is-active nginx && sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS\t90/' /etc/login.defs && grep ^PASS_MAX_DAYS /etc/login.defs && sed -i 's/^#\? *minlen *=.*/minlen = 12/' /etc/security/pwquality.conf && { grep -q '^minlen' /etc/security/pwquality.conf || echo 'minlen = 12' >> /etc/security/pwquality.conf; } && grep ^minlen /etc/security/pwquality.conf && chage -M 90 kostyaev && chage -l kostyaev | grep -i maximum
+   14  groupadd -g 5500 developers && groupadd -g 4444 curators && useradd -u 5501 -G developers user1 && useradd -u 5502 -G developers user2 && useradd -u 5503 -G developers user3 && useradd -G curators curator1 && useradd -G curators curator2 && id user1; id user2; id user3; id curator1; id curator2; chage -l user1 | grep -i maximum
+   15  for u in user1 user2 user3 curator1 curator2; do echo "== $u"; passwd $u; done
+   16  findmnt -no FSTYPE,OPTIONS / && mkdir -p /data/mephi-2026 && chown root:developers /data/mephi-2026 && chmod 2770 /data/mephi-2026 && setfacl -m g:curators:rx /data/mephi-2026 && setfacl -d -m u::rwx,g::rwx,g:curators:rx,o::--- /data/mephi-2026 && getfacl /data/mephi-2026 && sudo -u user1 sh -c 'echo test > /data/mephi-2026/f1' && getfacl /data/mephi-2026/f1 && sudo -u user2 sh -c 'echo user2 >> /data/mephi-2026/f1' && echo "OK: user2 пишет в файл user1" ; sudo -u curator1 cat /data/mephi-2026/f1 && echo "OK: curator1 читает" ; sudo -u curator1 sh -c 'echo x >> /data/mephi-2026/f1' 2>&1 | head -1 ; sudo -u kostyaev ls /data/mephi-2026 2>&1 | head -1 ; rm -f /data/mephi-2026/f1
+   17  TCPD=$(readlink -f "$(command -v tcpdump)") && echo "$TCPD" && ls -l "$TCPD" && chmod u-s "$TCPD" && setcap cap_net_raw,cap_net_admin=ep "$TCPD" && getcap "$TCPD" && ls -l "$TCPD" && sudo -u user1 "$TCPD" -c 5 -i any
+   18  getenforce && cat /sys/fs/selinux/enforce && echo && grep ^SELINUX= /etc/selinux/config
+   19  semanage fcontext -a -t httpd_sys_content_t "/mephi-web(/.*)?" && restorecon -Rv /mephi-web && ls -dZ /mephi-web && grep -n 'root ' /etc/nginx/nginx.conf && cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak && sed -i 's#root\s\+/usr/share/nginx/html;#root /mephi-web;#' /etc/nginx/nginx.conf && grep -n 'root ' /etc/nginx/nginx.conf && nginx -t && systemctl restart nginx && systemctl is-active nginx
+   20  cat /etc/pam.d/login && echo "-----" && if grep -q '^account.*include.*system-auth' /etc/pam.d/login; then   sed -i '/^account.*include.*system-auth/a account    required     pam_access.so' /etc/pam.d/login; else   echo 'account    required     pam_access.so' >> /etc/pam.d/login; fi && { grep -q '^-:(curators):LOCAL' /etc/security/access.conf || echo '-:(curators):LOCAL' >> /etc/security/access.conf; } && grep -n account /etc/pam.d/login && tail -1 /etc/security/access.conf
+   21  journalctl --since "15 min ago" | grep -Ei 'pam_access|curator1' | tail -10
+   22  passwd curator1
+   23  journalctl --since "5 min ago" | grep -Ei 'pam_access|curator1' | tail -5
+   24  passwd user1
+   25  echo 'Hello from Student: M265876' > /mephi-web/index.html && restorecon -v /mephi-web/index.html && ls -Z /mephi-web/index.html && curl http://localhost/
+   26  history -a
+   27  reboot
+   28  hostname; findmnt /mephi-web; systemctl is-enabled nginx; systemctl is-active nginx; getenforce; getcap /usr/sbin/tcpdump; getfacl -p /data/mephi-2026 | head -12; grep ^minlen /etc/security/pwquality.conf; tail -1 /etc/security/access.conf; chage -l kostyaev | head -4; curl http://localhost/
+   29  cd ~ && ping -c 4 8.8.8.8 > ~/ping.out && stat /data/mephi-2026 > ~/stat.out && stat /mephi-web >> ~/stat.out && getcap /usr/sbin/tcpdump > ~/getcap.out && dnf history > ~/dnf.out && journalctl -u nginx -b > ~/journalctl.out && getenforce > ~/getenforce.out && curl http://localhost/ > ~/curl.out && getfacl -p /data/mephi-2026 > ~/getfacl.out && mkdir -p ~/mephi-session-project-2026 && cd ~/mephi-session-project-2026 && cp ~/ping.out ~/stat.out ~/getcap.out ~/dnf.out ~/journalctl.out ~/getenforce.out ~/curl.out ~/getfacl.out . && cp /etc/fstab /etc/passwd /etc/shadow /etc/group /etc/security/pwquality.conf . && chmod 644 shadow && history > history.out && ls -l && cat curl.out getenforce.out getcap.out && grep -c . journalctl.out
